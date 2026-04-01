@@ -1,0 +1,19 @@
+# Keil MDK-ARM
+**/Objects/
+**/Listings/
+*.uvguix.*
+*.uvoptx.bak
+*.dep
+*.lnp
+*.htm
+*.map
+*.axf
+*.crf
+*.d
+*.o
+*.lst
+*.iex
+*.Bak
+
+# 卖家参考例程体积大，本地保留即可；需要可单独 submodule 或说明路径
+stm32f1_Lib/
