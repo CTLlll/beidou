@@ -10,7 +10,7 @@ extern "C" {
 
 /**
  * @brief 初始化 TTS 模块（VTX316）
- * @note 需在 CubeMX 里开启 USART2，115200 8N1
+ * @note 语音模块接 USART1（PA9 TX），115200 8N1
  */
 void tts_init(void);
 

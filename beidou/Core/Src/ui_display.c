@@ -2,6 +2,7 @@
 #include "lcd_hal.h"
 #include "main.h"
 #include "bd_nmea.h"
+#include "bd_gnss_uart.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
@@ -67,13 +68,13 @@ void ui_show_position(double lat, double lon, uint8_t sats) {
     ui_fill_workspace(UI_COLOR_BG);
     snprintf(buf, sizeof(buf), "Sats:%u", (unsigned)sats);
     LCD_ShowString(4, UI_VY(4), (const uint8_t*)buf, UI_COLOR_TEXT, UI_COLOR_BG, UI_FONT_H);
-    snprintf(buf, sizeof(buf), "N:%.5f", lat);
+    snprintf(buf, sizeof(buf), "N:%.2f", lat);
     LCD_ShowString(4, UI_VY(22), (const uint8_t*)buf, UI_COLOR_TEXT, UI_COLOR_BG, UI_FONT_H);
-    snprintf(buf, sizeof(buf), "E:%.5f", lon);
+    snprintf(buf, sizeof(buf), "E:%.2f", lon);
     LCD_ShowString(4, UI_VY(40), (const uint8_t*)buf, UI_COLOR_TEXT, UI_COLOR_BG, UI_FONT_H);
 }
 
-static char s_bd_line_last[5][32];
+static char s_bd_line_last[4][32];
 static uint8_t s_bd_line_inited;
 
 void ui_bd_live_reset(void) {
@@ -81,37 +82,27 @@ void ui_bd_live_reset(void) {
     s_bd_line_inited = 0u; /* 下一帧 ui_show_bd_live 会整区清屏并重画各行 */
 }
 
-void ui_show_bd_live(const bd_nmea_position_t *pos, uint32_t rx_total, uint32_t rx_per_sec) {
-    char line[5][32];
+void ui_show_bd_live(const bd_nmea_position_t *pos, bool nav_enabled, bool parse_ok_seen) {
+    char line[4][32];
     uint16_t y;
 
-    snprintf(line[0], sizeof(line[0]), "RX:%lu %lu/s TX:--",
-             (unsigned long)rx_total, (unsigned long)rx_per_sec);
-
-    if (!pos) {
-        snprintf(line[1], sizeof(line[1]), "POS:NULL");
-        snprintf(line[2], sizeof(line[2]), "HDOP:-- A:--");
-        snprintf(line[3], sizeof(line[3]), "N:--------");
-        snprintf(line[4], sizeof(line[4]), "E:--------");
+    if (!nav_enabled) {
+        snprintf(line[0], sizeof(line[0]), "NAV:STOP P:%s", parse_ok_seen ? "OK" : "--");
     } else {
-        if (pos->fix == BD_NMEA_FIX_VALID) {
-            snprintf(line[1], sizeof(line[1]), "FIX:OK S:%u", (unsigned)pos->sats);
-        } else {
-            snprintf(line[1], sizeof(line[1]), "FIX:-- S:%u", (unsigned)pos->sats);
-        }
-        if (pos->hdop >= 0.0f) {
-            snprintf(line[2], sizeof(line[2]), "HDOP:%.1f A:%.0fm",
-                     (double)pos->hdop, (double)pos->altitude_m);
-        } else {
-            snprintf(line[2], sizeof(line[2]), "HDOP:-- A:%.0fm", (double)pos->altitude_m);
-        }
-        if (pos->fix == BD_NMEA_FIX_VALID) {
-            snprintf(line[3], sizeof(line[3]), "N:%.5f", pos->ll.lat_deg);
-            snprintf(line[4], sizeof(line[4]), "E:%.5f", pos->ll.lon_deg);
-        } else {
-            snprintf(line[3], sizeof(line[3]), "N:--------");
-            snprintf(line[4], sizeof(line[4]), "E:--------");
-        }
+        snprintf(line[0], sizeof(line[0]), "NAV:RUN");
+    }
+    if (!pos) {
+        snprintf(line[1], sizeof(line[1]), "FIX:--  S:0");
+        snprintf(line[2], sizeof(line[2]), "N:--");
+        snprintf(line[3], sizeof(line[3]), "E:--");
+    } else if (pos->fix != BD_NMEA_FIX_VALID) {
+        snprintf(line[1], sizeof(line[1]), "FIX:--  S:%u", (unsigned)pos->sats);
+        snprintf(line[2], sizeof(line[2]), "N:--");
+        snprintf(line[3], sizeof(line[3]), "E:--");
+    } else {
+        snprintf(line[1], sizeof(line[1]), "FIX:OK  S:%u", (unsigned)pos->sats);
+        snprintf(line[2], sizeof(line[2]), "N:%.2f", pos->ll.lat_deg);
+        snprintf(line[3], sizeof(line[3]), "E:%.2f", pos->ll.lon_deg);
     }
 
     if (!s_bd_line_inited) {
@@ -120,7 +111,7 @@ void ui_show_bd_live(const bd_nmea_position_t *pos, uint32_t rx_total, uint32_t 
         s_bd_line_inited = 1;
     }
 
-    for (unsigned i = 0; i < 5u; i++) {
+    for (unsigned i = 0; i < 4u; i++) {
         if (strcmp(line[i], s_bd_line_last[i]) == 0) {
             continue;
         }
@@ -129,8 +120,10 @@ void ui_show_bd_live(const bd_nmea_position_t *pos, uint32_t rx_total, uint32_t 
         {
             uint16_t fc = UI_COLOR_TEXT;
             if (i == 0u) {
-                fc = UI_COLOR_ACCENT;
-            } else if (i >= 3u && (!pos || pos->fix != BD_NMEA_FIX_VALID)) {
+                fc = nav_enabled ? GREEN : UI_COLOR_ACCENT;
+            } else if (i == 1u && pos && pos->fix == BD_NMEA_FIX_VALID) {
+                fc = CYAN;
+            } else if (i >= 2u && (!pos || pos->fix != BD_NMEA_FIX_VALID)) {
                 fc = YELLOW;
             }
             LCD_ShowString(2, y, (const uint8_t*)line[i], fc, UI_COLOR_BG, UI_FONT_H);

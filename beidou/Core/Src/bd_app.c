@@ -24,8 +24,18 @@ void bd_app_init(bd_app_t *app,
   app->pos.fix = BD_NMEA_FIX_NONE;
   app->in_landmark = false;
   app->current_id = 0;
+  app->landmark_enabled = false;
 
   app->cbs = cbs;
+}
+
+void bd_app_set_landmark_enabled(bd_app_t *app, bool enabled) {
+  if (!app) {
+    return;
+  }
+  app->landmark_enabled = enabled;
+  app->in_landmark = false;
+  app->current_id = 0;
 }
 
 void bd_app_on_uart_rx_byte(bd_app_t *app, uint8_t b) {
@@ -72,23 +82,49 @@ static const bd_landmark_t *pick_enter_candidate(const bd_landmark_db_t *db,
 
 void bd_app_poll(bd_app_t *app) {
   uint8_t b = 0;
-  while (bd_ring_pop(&app->rx, &b)) {
+  unsigned budget = (unsigned)BD_APP_POLL_MAX_BYTES;
+  while (budget-- > 0u && bd_ring_pop(&app->rx, &b)) {
     if (!bd_nmea_sentence_acc_feed(&app->acc, (char)b)) continue;
 
     const char *line = app->acc.buf;
     const size_t len = app->acc.len;
+    app->stat_nmea_lines++;
 
-    if (!bd_nmea_checksum_ok(line, len)) continue;
+    if (!bd_nmea_checksum_ok(line, len)) {
+      app->stat_checksum_bad++;
+      continue;
+    }
+    app->stat_checksum_ok++;
+
+    {
+      const bd_nmea_kind_t k = bd_nmea_classify_sentence(line, len);
+      if (k == BD_NMEA_KIND_RMC) {
+        app->stat_rmc++;
+      } else if (k == BD_NMEA_KIND_GGA) {
+        app->stat_gga++;
+      } else if (k == BD_NMEA_KIND_OTHER_NMEA) {
+        app->stat_other_nmea++;
+      }
+    }
 
     bd_debug_uart_log_nmea_line(line, len);
 
     bd_nmea_position_t newpos = app->pos;
-    if (!bd_nmea_parse_position(line, len, &newpos)) continue;
+    if (!bd_nmea_parse_position(line, len, &newpos)) {
+      app->stat_parse_skip++;
+      continue;
+    }
+
+    app->stat_parse_ok++;
 
     app->pos = newpos;
     if (app->cbs.on_pos) app->cbs.on_pos(&app->pos);
 
     if (app->pos.fix != BD_NMEA_FIX_VALID) continue;
+
+    if (!app->landmark_enabled) {
+      continue;
+    }
 
     // state machine with hysteresis
     if (!app->in_landmark) {

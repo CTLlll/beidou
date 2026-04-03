@@ -1,10 +1,12 @@
 #include "bd_debug_uart.h"
 
 #include "bd_uart_ring.h"
+#include "bd_gnss_uart.h"
 #include "main.h"
 #include "usart.h"
 #include <stdio.h>
 
+extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 
 #if BD_DEBUG_UART_RAW_FORWARD
@@ -59,10 +61,8 @@ void bd_debug_uart_print_pos(const bd_nmea_position_t *pos) {
 }
 
 void bd_debug_uart_boot_line(void) {
-#if BD_DEBUG_UART_RAW_FORWARD || BD_DEBUG_UART_NMEA_LOG
-  static const char msg[] = "[BD] USART2 OK; raw USART1->PC if RAW_FORWARD\r\n";
+  static const char msg[] = "[BD] GNSS=USART2 PA3 115200; TTS=USART1 PA9; dbg=PA2 TX\r\n";
   (void)HAL_UART_Transmit(&huart2, (uint8_t *)msg, (uint16_t)(sizeof(msg) - 1u), 150);
-#endif
 }
 
 void bd_debug_uart_log_nmea_line(const char *line, size_t len) {

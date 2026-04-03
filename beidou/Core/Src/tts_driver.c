@@ -1,6 +1,7 @@
 #include "tts_driver.h"
 #include "main.h"
 #include "usart.h"
+#include <stdio.h>
 #include <string.h>
 
 // VTX316 播放帧格式: FD 00 (len+2) 01 05 [GBK text]
@@ -14,7 +15,7 @@
 // We'll need a simple GBK conversion - for now send as ASCII/UTF-8
 // In production, you'd add GBK conversion table or library
 
-extern UART_HandleTypeDef huart2;
+extern UART_HandleTypeDef huart1;
 
 // 内部函数：计算字符串的 GBK 长度
 // 由于 STM32F103 缺少完整的 GBK 编码表，这里做简化处理：
@@ -44,8 +45,8 @@ bool tts_speak(const char *text) {
         return false;
     }
 
-    // 计算文本长度（简化处理）
-    size_t text_len = strlen(text);  // 实际用 GBK 时需要转换
+    // 计算文本长度（简化处理：ASCII=1，非 ASCII=2）
+    size_t text_len = calc_gbk_len(text);
     size_t frame_len = text_len + 2;  // 帧长度 = 文本 + 2
 
     // 构建帧头
@@ -58,13 +59,13 @@ bool tts_speak(const char *text) {
     };
 
     // 发送帧头
-    if (HAL_UART_Transmit(&huart2, frame, 5, 100) != HAL_OK) {
+    if (HAL_UART_Transmit(&huart1, frame, 5, 100) != HAL_OK) {
         return false;
     }
 
     // 发送文本（实际应转为 GBK）
     // 这里直接发送，假设模块能处理或文本是 ASCII
-    if (HAL_UART_Transmit((UART_HandleTypeDef*)&huart2, (uint8_t*)text, text_len, 500) != HAL_OK) {
+    if (HAL_UART_Transmit(&huart1, (uint8_t*)text, text_len, 500) != HAL_OK) {
         return false;
     }
 
@@ -73,7 +74,7 @@ bool tts_speak(const char *text) {
 
 void tts_stop(void) {
     uint8_t cmd[] = {0xFD, 0x00, 0x01, 0x03};
-    HAL_UART_Transmit(&huart2, cmd, sizeof(cmd), 100);
+    HAL_UART_Transmit(&huart1, cmd, sizeof(cmd), 100);
 }
 
 void tts_set_volume(uint8_t level) {
@@ -86,7 +87,7 @@ void tts_set_volume(uint8_t level) {
         (uint8_t)(0x30 + level),
         0x5D
     };
-    HAL_UART_Transmit(&huart2, cmd, sizeof(cmd), 100);
+    HAL_UART_Transmit(&huart1, cmd, sizeof(cmd), 100);
 }
 
 void tts_set_speed(uint8_t level) {
@@ -100,7 +101,7 @@ void tts_set_speed(uint8_t level) {
         (uint8_t)(0x30 + level),
         0x5D
     };
-    HAL_UART_Transmit(&huart2, cmd, sizeof(cmd), 100);
+    HAL_UART_Transmit(&huart1, cmd, sizeof(cmd), 100);
 }
 
 void tts_set_voice(uint8_t id) {
@@ -115,6 +116,6 @@ void tts_set_voice(uint8_t id) {
     uint8_t frame[6] = {
         0xFD, 0x00, (uint8_t)(len + 2), 0x01, 0x05
     };
-    HAL_UART_Transmit(&huart2, frame, 5, 100);
-    HAL_UART_Transmit((UART_HandleTypeDef*)&huart2, (uint8_t*)cmd_str, len, 100);
+    HAL_UART_Transmit(&huart1, frame, 5, 100);
+    HAL_UART_Transmit(&huart1, (uint8_t*)cmd_str, len, 100);
 }

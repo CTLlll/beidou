@@ -13,6 +13,19 @@
 #define LCD_BLK_PIN   GPIO_PIN_8
 #define LCD_PORT      GPIOB
 
+/* 背光电平：部分板卡 BLK 为低亮（反相）。默认按“低亮”处理。 */
+#ifndef LCD_BLK_ACTIVE_LOW
+#define LCD_BLK_ACTIVE_LOW 1
+#endif
+
+#if LCD_BLK_ACTIVE_LOW
+#define LCD_BLK_ON  GPIO_PIN_RESET
+#define LCD_BLK_OFF GPIO_PIN_SET
+#else
+#define LCD_BLK_ON  GPIO_PIN_SET
+#define LCD_BLK_OFF GPIO_PIN_RESET
+#endif
+
 // Color definitions
 #define WHITE   0xFFFF
 #define BLACK   0x0000  
@@ -40,6 +53,7 @@
 #ifndef LCD_X_OFFSET
 #define LCD_X_OFFSET 0
 #endif
+
 #ifndef LCD_Y_OFFSET
 #define LCD_Y_OFFSET 24
 #endif

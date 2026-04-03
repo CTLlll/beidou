@@ -38,6 +38,16 @@ bool bd_nmea_sentence_acc_feed(bd_nmea_sentence_acc_t *a, char b);
 // 校验 NMEA 校验和（若语句不含 *XX，则返回 false）
 bool bd_nmea_checksum_ok(const char *sentence, size_t len);
 
+/** 句型（在已通过校验和的句子上统计更有意义） */
+typedef enum {
+  BD_NMEA_KIND_UNKNOWN = 0,
+  BD_NMEA_KIND_RMC,
+  BD_NMEA_KIND_GGA,
+  BD_NMEA_KIND_OTHER_NMEA, /* $ 开头、非 RMC/GGA 的其它 NMEA */
+} bd_nmea_kind_t;
+
+bd_nmea_kind_t bd_nmea_classify_sentence(const char *sentence, size_t len);
+
 // 解析 RMC/GGA 获取位置。若成功更新 out（fix/ll 等），返回 true。
 bool bd_nmea_parse_position(const char *sentence, size_t len, bd_nmea_position_t *out);
 

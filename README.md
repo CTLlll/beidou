@@ -15,7 +15,7 @@ tts http://www.hellostem.cn/?ljiliechuanganqipeijiandeng/365.html=
 | 协议 | NMEA-0183 |
 | 波特率 | 115200 bps (8N1) |
 | 引脚 | RX, TX, VCC, GND, PPS(可选) |
-| 串口 | USART1 (PA9=TX, PA10=RX) |
+| 串口 | **USART2 (PA2=TX, PA3=RX)**（模块 TX→PA3） |
 
 ### TTS 语音模块 (VTX316)
 
@@ -25,7 +25,19 @@ tts http://www.hellostem.cn/?ljiliechuanganqipeijiandeng/365.html=
 | 波特率 | 115200 bps (8N1) |
 | 编码 | GBK |
 | 播放帧格式 | `0xFD 0x00 (长度+2) 0x01 0x05 + GBK文本` |
-| 串口 | USART2 (PA2=TX, PA3=RX) |
+| 串口 | **USART1 (PA9=TX, PA10=RX)**（通常只接 PA9→TTS RX） |
+
+### 板载按键（KEY）
+
+| 项目 | 值 |
+|------|------|
+| GPIO | **PA0** |
+| 模式 | 输入上拉，**按下为低** |
+| 行为 | 短按切换 **NAV RUN/STOP**：STOP 时只解析显示，不判地标不播报；RUN 时进入地标播报一次 |
+
+### 调试串口（可选）
+
+- **PA2 (USART2_TX)** 可接 USB-TTL 查看启动信息与解析坐标输出（不影响 TTS，因为 TTS 已迁 USART1）。
 
 ### LCD 屏幕 (ST7735S)
 
@@ -87,8 +99,8 @@ src/              - 实现文件
 
 ### 1. CubeMX 配置
 
-- **USART1**（北斗）：115200，8N1，开启 NVIC 中断
-- **USART2**（TTS）：115200，8N1，开启 NVIC 中断
+- **USART2**（北斗）：115200，8N1，开启 NVIC 中断
+- **USART1**（TTS）：115200，8N1
 - **LCD 引脚**：PB3, PB4, PB5, PB6, PB7 配置为对应功能
 - **禁用 JTAG**：PB3 设为普通 GPIO（因为与 LCD SCL 冲突）
 

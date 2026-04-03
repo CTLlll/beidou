@@ -10,6 +10,7 @@
 extern "C" {
 #endif
 
+
 /**
  * @brief 初始化 LCD 屏幕
  * @note 需要先调用 LCD_Init()（来自你的 lcd_init.c）
@@ -36,9 +37,11 @@ void ui_clear(void);
 void ui_show_position(double lat, double lon, uint8_t sats);
 
 /**
- * @brief 北斗调试：仅在某一行内容变化时重绘该行，减轻闪烁（首帧会全屏清一次）
+ * @brief 精简北斗界面
+ * - nav_enabled=0：显示解析/解包是否有成功（parse_ok_seen），便于等信号前确认链路通
+ * - nav_enabled=1：只关注 FIX/经纬度（进入地标才播报）
  */
-void ui_show_bd_live(const bd_nmea_position_t *pos, uint32_t rx_total, uint32_t rx_per_sec);
+void ui_show_bd_live(const bd_nmea_position_t *pos, bool nav_enabled, bool parse_ok_seen);
 
 /** 切换界面后若需重新进入北斗调试全屏，可先调用以强制下一帧重绘全部行 */
 void ui_bd_live_reset(void);

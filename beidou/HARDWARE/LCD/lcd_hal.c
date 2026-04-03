@@ -99,7 +99,7 @@ void LCD_Init(void) {
     HAL_GPIO_WritePin(LCD_PORT, LCD_RES_PIN, GPIO_PIN_SET);
     HAL_Delay(100);
     
-    HAL_GPIO_WritePin(LCD_PORT, LCD_BLK_PIN, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(LCD_PORT, LCD_BLK_PIN, LCD_BLK_ON);
     HAL_Delay(100);
 
     LCD_WR_REG(0x11);

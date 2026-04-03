@@ -95,6 +95,41 @@ static bool starts_with(const char *s, const char *prefix) {
   return strncmp(s, prefix, strlen(prefix)) == 0;
 }
 
+bd_nmea_kind_t bd_nmea_classify_sentence(const char *sentence, size_t len) {
+  if (!sentence || len < 6u || sentence[0] != '$') {
+    return BD_NMEA_KIND_UNKNOWN;
+  }
+  char tmp[128];
+  size_t n = 0;
+  for (size_t i = 0; i < len && n + 1u < sizeof(tmp); i++) {
+    const char c = sentence[i];
+    if (c == '*') {
+      break;
+    }
+    if (c == '\r' || c == '\n') {
+      break;
+    }
+    tmp[n++] = c;
+  }
+  tmp[n] = '\0';
+  if (n < 6u) {
+    return BD_NMEA_KIND_UNKNOWN;
+  }
+  char *fields[4] = {0};
+  const size_t nf = split_fields(tmp, fields, 4);
+  if (nf < 1u || !fields[0]) {
+    return BD_NMEA_KIND_UNKNOWN;
+  }
+  const char *t = fields[0];
+  if (strstr(t, "RMC") != NULL) {
+    return BD_NMEA_KIND_RMC;
+  }
+  if (strstr(t, "GGA") != NULL) {
+    return BD_NMEA_KIND_GGA;
+  }
+  return BD_NMEA_KIND_OTHER_NMEA;
+}
+
 bool bd_nmea_parse_position(const char *sentence, size_t len, bd_nmea_position_t *out) {
   if (!sentence || !out || len < 10) return false;
   if (sentence[0] != '$') return false;
@@ -129,6 +164,8 @@ bool bd_nmea_parse_position(const char *sentence, size_t len, bd_nmea_position_t
 
     if (!status || status[0] != 'A') {
       out->fix = BD_NMEA_FIX_NONE;
+      out->ll.lat_deg = 0.0;
+      out->ll.lon_deg = 0.0;
       return true;
     }
 
@@ -161,8 +198,11 @@ bool bd_nmea_parse_position(const char *sentence, size_t len, bd_nmea_position_t
     out->hdop = (hdop_s && *hdop_s) ? (float)atof(hdop_s) : -1.0f;
     out->altitude_m = (alt_s && *alt_s) ? (float)atof(alt_s) : 0.0f;
 
+    // 即使 fix=0（无定位）也返回成功，只是 fix=NONE，这样卫星数等信息能正常显示
     if (fix_i <= 0) {
       out->fix = BD_NMEA_FIX_NONE;
+      out->ll.lat_deg = 0.0;
+      out->ll.lon_deg = 0.0;
       return true;
     }
 
