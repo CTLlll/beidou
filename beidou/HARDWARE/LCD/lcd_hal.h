@@ -18,6 +18,7 @@
 #define LCD_BLK_ACTIVE_LOW 1
 #endif
 
+
 #if LCD_BLK_ACTIVE_LOW
 #define LCD_BLK_ON  GPIO_PIN_RESET
 #define LCD_BLK_OFF GPIO_PIN_SET

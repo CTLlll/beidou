@@ -14,6 +14,27 @@
 *.lst
 *.iex
 *.Bak
+*.hex
+*.bin
+*.elf
+
+# Keil user settings / caches
+*.uvoptx
+*.scvd
+*.uvmpw
+*.uvgui*
 
 # 卖家参考例程体积大，本地保留即可；需要可单独 submodule 或说明路径
 stm32f1_Lib/
+
+# docs 中间产物（解包、临时 zip、草稿）
+docs/docx_extract_tmp/
+docs/rules_extracted.txt
+docs/rules_tmp.zip
+docs/*.docx
+
+# 本地图片/屏幕工程测试产物（不上传）
+/hardware/
+/pic_output/
+/usart_screen/
+/usart_screen_lib/

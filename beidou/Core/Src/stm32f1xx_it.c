@@ -62,6 +62,32 @@ volatile uint32_t bd_uart1_ne;
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+/**
+ * GNSS UART RX ISR body: read DR manually to avoid HAL disabling RXNEIE.
+ * Used when BD_USE_USART2_FOR_GNSS selects USART2/USART1 as GNSS input.
+ */
+static void bd_gnss_uart_rx_isr_body(USART_TypeDef *uart, UART_HandleTypeDef *hal_uart)
+{
+  bd_uart1_irq_entries++;
+
+  if (__HAL_UART_GET_FLAG(hal_uart, UART_FLAG_RXNE) != RESET) {
+    const uint32_t sr = uart->SR;
+    const uint8_t res = (uint8_t)(uart->DR & 0xFFU);
+    if ((sr & USART_SR_FE) != 0U) {
+      bd_uart1_fe++;
+    }
+    if ((sr & USART_SR_NE) != 0U) {
+      bd_uart1_ne++;
+    }
+    bd_uart1_rx_bytes++;
+    bd_app_on_uart_rx_byte(&bd_app_instance, res);
+    bd_debug_uart_rx_byte_for_forward(res);
+  } else if ((uart->SR & USART_SR_ORE) != 0U) {
+    bd_uart1_ore++;
+    (void)READ_REG(uart->DR);
+  }
+}
+
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -208,32 +234,6 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32f1xx.s).                    */
 /******************************************************************************/
-
-/**
- * USART2 上已验证的收包路径，USART1/USART2 共用同一实现，仅换外设指针。
- * 不调用 HAL_UART_IRQHandler（避免 HAL 关 RXNEIE）。
- */
-static void bd_gnss_uart_rx_isr_body(USART_TypeDef *uart, UART_HandleTypeDef *hal_uart)
-{
-  bd_uart1_irq_entries++;
-
-  if (__HAL_UART_GET_FLAG(hal_uart, UART_FLAG_RXNE) != RESET) {
-    const uint32_t sr = uart->SR;
-    const uint8_t res = (uint8_t)(uart->DR & 0xFFU);
-    if ((sr & USART_SR_FE) != 0U) {
-      bd_uart1_fe++;
-    }
-    if ((sr & USART_SR_NE) != 0U) {
-      bd_uart1_ne++;
-    }
-    bd_uart1_rx_bytes++;
-    bd_app_on_uart_rx_byte(&bd_app_instance, res);
-    bd_debug_uart_rx_byte_for_forward(res);
-  } else if ((uart->SR & USART_SR_ORE) != 0U) {
-    bd_uart1_ore++;
-    (void)READ_REG(uart->DR);
-  }
-}
 
 /**
   * @brief This function handles USART1 global interrupt.

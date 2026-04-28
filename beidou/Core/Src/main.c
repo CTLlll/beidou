@@ -34,7 +34,7 @@
 #include "bd_gnss_uart.h"
 #include <stdio.h>
 
-/** ä¸»å¾ªç¯èŠ‚æ‹ï¼ˆæ¯«ç§’ï¼‰ï¼›ç•¥å¢å¤§å¯é™ä½è½®è¯¢é¢‘ç‡ï¼ŒNMEA çº¦ 1Hz æ—¶ 30~100 å‡å¯ */
+/** ä¸????ç®??©?????????ç§???????ç????¾?¤§??é?ä?®??????é??ç®????NMEA ç?? 1Hz ??? 30~100 ???? */
 #ifndef BD_MAIN_LOOP_DELAY_MS
 #define BD_MAIN_LOOP_DELAY_MS 50u
 #endif
@@ -48,33 +48,56 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-/** ç½® 1ï¼šä»…è·‘ LCD æµ‹è¯•ï¼Œä¸è·‘ä¸šåŠ¡ï¼›æµ‹åŒ—æ–—æ—¶è¯·æ”¹ä¸º 0 */
+/** ç?? 1??¹ä????? LCD ?????????ä¸???ä¸¹?©??????????????????????ä¸? 0 */
 #define BD_HW_SELFTEST 0
-/** BD_HW_SELFTEST=1 æ—¶ï¼š0=åˆ†åŒºè‰²å—ï¼›1=MADCTL æ‰«æï¼›2=æ–‡å­—æµ‹è¯• ui_lcd_text_demo */
+/** BD_HW_SELFTEST=1 ?????¹0=??????????????1=MADCTL ???????2=????­??????? ui_lcd_text_demo */
 #define BD_LCD_TEST_KIND 2
-/** ç½® 1ï¼šå®šä½å›è°ƒé‡Œç”¨ ui_show_positionï¼›ä¸å±å¹•å®æ—¶è°ƒè¯• ui_show_bd_live äºŒé€‰ä¸€ */
+/** ç?? 1??¹??¹ä???¾?°?é??ç?? ui_show_position???ä¸®???????¾????°???? ui_show_bd_live ä??é??ä¸? */
 #define BD_DEBUG_LCD_POSITION 0
 /**
- * ç½® 1ï¼šæ¯æ¬¡å¾—åˆ°æœ‰æ•ˆå®šä½æ—¶ç» USART2 PA2 TX æ‰“å°è§£æåçš„åè¿›åˆ¶åº¦ï¼ˆTTS å·²ç”¨ USART1ï¼Œå¯ä¸è°ƒè¯•å…±å­˜ï¼‰ã€‚
+ * ç?? 1??¹??????????°????????¹ä????ç?? USART2 PA2 TX ????°?§??¾?®ç¹??????????????TTS ???ç?¨ USART1?????ä¸®?°????????­???????
  */
 #define BD_DEBUG_UART_POS 0
 /**
- * ç½® 1ï¼šä¸Šç”µå TTSï¼ˆUSART1 PA9ï¼‰æ’­æŠ¥ä¸€æ¬¡ "OK"ï¼ŒéªŒè¯æ¨¡å—é“¾è·¯ï¼›é‡äº§å¯æ”¹ 0ã€‚
+ * ç?? 1??¹ä¸©ç???® TTS???USART1 PA9?????­?©?ä¸???? "OK"???é?????¨???é????????é?ä?§????? 0???
  */
 #ifndef BD_TTS_BOOT_SAY_OK
 #define BD_TTS_BOOT_SAY_OK 1
 #endif
 /**
- * ç½® 1ï¼šä»…æµ‹ MCU ç‰‡å†… USART1 æ”¶å‘ã€‚è¯·å…ˆæ–­å¼€åŒ—æ–—æ¨¡å— TXâ†’PA10ï¼Œç”¨æœé‚¦çº¿çŸ­æ¥ PA9(TX) ä¸ PA10(RX)ï¼Œ
- * ä¸Šç”µåçœ‹å±ä¸Š LB OK / LB FAILï¼›æµ‹å®Œæ”¹å› 0ã€‚æ³¨æ„ï¼šç° TTS å ç”¨ USART1ï¼Œæµ‹å›ç¯æ—¶è¯·æ–­å¼€ TTS RXã€‚
+ * ç?? 1??¹ä????? MCU ç????? USART1 ????????????????­??????????¨??? TXâ??PA10???ç?¨??é??ç??ç?­?®? PA9(TX) ä¸? PA10(RX)???
+ * ä¸©ç???®ç????ä¸© LB OK / LB FAIL??????????????? 0?????¨????¹ç®? TTS ? ç?¨ USART1????????¾ç®?????????­??? TTS RX???
  */
 #define BD_USART1_LOOPBACK_SELFTEST 0
+/** ???(HMI)???? */
+#ifndef BD_TJC_HMI_ENABLE
+#define BD_TJC_HMI_ENABLE 1
+#endif
+/* Page switching: use page index (most robust). If you prefer names, change to "main"/etc. */
+#define BD_TJC_PAGE_BOOT  "0"
+#define BD_TJC_PAGE_1     "1"
+#define BD_TJC_PAGE_2     "2"
+
+/* PA0???????????????????(???)=1?????????0 */
+#ifndef BD_KEY_ACTIVE_LOW
+#define BD_KEY_ACTIVE_LOW 1
+#endif
+
+/* ???????????? 5s ???? page2 ???????? */
+#ifndef BD_KEY_LONG_PRESS_MS
+#define BD_KEY_LONG_PRESS_MS 2000u
+#endif
+#ifndef BD_TEST_ACTION_DELAY_MS
+#define BD_TEST_ACTION_DELAY_MS 5000u
+#endif
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 
 /* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
 bd_app_t bd_app_instance;
@@ -86,6 +109,11 @@ static uint8_t bd_rx_buf[256];
 static char bd_nmea_line[128];
 #define LANDMARK_CAP 10
 static bd_landmark_t landmark_storage[LANDMARK_CAP];
+static uint8_t s_key_prev_down;
+static uint32_t s_key_down_tick;
+static uint8_t s_test_pending;
+static uint32_t s_test_deadline_tick;
+static uint8_t s_test_active;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -93,6 +121,11 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 static void bd_update_rx_rate(void);
 static void bd_poll_nav_key(void);
+#if BD_TJC_HMI_ENABLE
+static void bd_tjc_send_cmd(const char *cmd);
+static void bd_tjc_show_page(const char *page_name);
+#endif
+static void bd_poll_test_action(void);
 #if BD_USART1_LOOPBACK_SELFTEST && !BD_USE_USART2_FOR_GNSS
 static void bd_uart1_loopback_demo(void);
 #endif
@@ -103,6 +136,10 @@ static void bd_uart1_loopback_demo(void);
 
 // Enter landmark callback
 static void on_enter_landmark(const bd_landmark_t *lm, float distance_m, const bd_nmea_position_t *pos) {
+#if BD_TJC_HMI_ENABLE
+    /* ??1??? page1 */
+    bd_tjc_show_page(BD_TJC_PAGE_1);
+#endif
     ui_show_landmark(lm->title);
     if (lm->speech_text) {
         tts_speak(lm->speech_text);
@@ -129,43 +166,45 @@ static void on_position_update(const bd_nmea_position_t *pos) {
 #endif
 }
 
-/* USER CODE END 0 */
+#if BD_TJC_HMI_ENABLE
+static void bd_tjc_send_cmd(const char *cmd) {
+    static const uint8_t end3[3] = {0xFF, 0xFF, 0xFF};
+    if (!cmd) {
+        return;
+    }
+    (void)HAL_UART_Transmit(&huart3, (uint8_t *)cmd, (uint16_t)strlen(cmd), 200);
+    (void)HAL_UART_Transmit(&huart3, (uint8_t *)end3, 3, 100);
+}
 
-#if BD_USART1_LOOPBACK_SELFTEST && !BD_USE_USART2_FOR_GNSS
-static void bd_uart1_loopback_demo(void)
-{
-  const uint8_t pat[] = { 0x55U, 0xAAU, 0x30U, 0x31U, 0x32U };
-  char msg[48];
-  uint32_t r0;
-  uint32_t i0;
-  uint32_t got;
-
-  LCD_Fill(0, 0, LCD_W, LCD_H, BLACK);
-  LCD_ShowString(2, 4, (const uint8_t *)"Disconnect GPS TX", YELLOW, BLACK, 16);
-  LCD_ShowString(2, 22, (const uint8_t *)"Short PA9 to PA10", WHITE, BLACK, 16);
-  LCD_ShowString(2, 40, (const uint8_t *)"TX=PA9 RX=PA10", CYAN, BLACK, 16);
-  HAL_Delay(2500);
-
-  r0 = bd_uart1_rx_bytes;
-  i0 = bd_uart1_irq_entries;
-  (void)HAL_UART_Transmit(&huart1, (uint8_t *)pat, sizeof(pat), 200);
-  HAL_Delay(80);
-
-  got = bd_uart1_rx_bytes - r0;
-  LCD_Fill(0, 48, LCD_W, LCD_H, BLACK);
-  snprintf(msg, sizeof(msg), "%s R+%lu I+%lu", (got >= sizeof(pat)) ? "LB OK" : "LB FAIL",
-           (unsigned long)got, (unsigned long)(bd_uart1_irq_entries - i0));
-  LCD_ShowString(2, 52, (const uint8_t *)msg, (got >= sizeof(pat)) ? GREEN : RED, BLACK, 16);
-
-  snprintf(msg, sizeof(msg), "[LB] got=%lu irq_delta=%lu\r\n", (unsigned long)got,
-           (unsigned long)(bd_uart1_irq_entries - i0));
-  (void)HAL_UART_Transmit(&huart2, (uint8_t *)msg, (uint16_t)strlen(msg), 200);
-
-  while (1) {
-    HAL_Delay(500);
-  }
+static void bd_tjc_show_page(const char *page_name) {
+    char cmd[32];
+    if (!page_name) {
+        return;
+    }
+    (void)snprintf(cmd, sizeof(cmd), "page %s", page_name);
+    bd_tjc_send_cmd(cmd);
 }
 #endif
+
+static void bd_poll_test_action(void) {
+    if (!s_test_pending) {
+        return;
+    }
+    const uint32_t now = HAL_GetTick();
+    if ((int32_t)(now - s_test_deadline_tick) < 0) {
+        return;
+    }
+    /* ???????? page2 + ??????? */
+    s_test_pending = 0u;
+    s_test_active = 1u;
+#if BD_TJC_HMI_ENABLE
+    bd_tjc_show_page(BD_TJC_PAGE_2);
+#endif
+    /* GBK bytes: ????????????????????? */
+    (void)tts_speak("\xB2\xE2\xCA\xD4\xBE\xB0\xB5\xE3\xA3\xBA\xD5\xE2\xCA\xC7\xD2\xBB\xB8\xF6\xB0\xB2\xBE\xB2\xB5\xC4\xD0\xA1\xC7\xF8\xA3\xAC\xBB\xB7\xBE\xB3\xD5\xFB\xBD\xE0\xD2\xCB\xBE\xD3");
+}
+
+/* USER CODE END 0 */
 
 /**
   * @brief  The application entry point.
@@ -199,6 +238,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_SPI2_Init();
   MX_USART2_UART_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
 
 #if BD_HW_SELFTEST
@@ -218,13 +258,25 @@ int main(void)
   ui_display_init();
   ui_bd_live_reset();
 
-  // 2. Initialize TTS moduleï¼ˆUSART1 PA9 TX â†’ TTS RXï¼‰
+  // 2. Initialize TTS module???USART1 PA9 TX â?? TTS RX???
   tts_init();
   tts_set_volume(6);
 #if BD_TTS_BOOT_SAY_OK
   HAL_Delay(150);
   (void)tts_speak("OK");
 #endif
+#if BD_TJC_HMI_ENABLE
+  bd_tjc_send_cmd("bkcmd=0");
+  bd_tjc_send_cmd("sleep=0");
+  bd_tjc_send_cmd("dim=100");
+  bd_tjc_show_page(BD_TJC_PAGE_BOOT);
+#endif
+  /* key/test state */
+  s_key_prev_down = 0u;
+  s_key_down_tick = 0u;
+  s_test_pending = 0u;
+  s_test_deadline_tick = 0u;
+  s_test_active = 0u;
 
   // 3. Initialize bd_app
   bd_app_callbacks_t cbs = {
@@ -239,30 +291,31 @@ int main(void)
               landmark_storage, LANDMARK_CAP,
               cbs);
 
-  /* ä¸Šç”µé»˜è®¤å…³é—­ï¼šæŒ‰ PA0 æ‰å¼€å§‹åœ°æ ‡åˆ¤å®šä¸æ’­æŠ¥ */
+  /* ä¸©ç??é????¤???é?­??¹??? PA0 ??????§???°? ???¤??¹ä¸®??­?©? */
   bd_app_set_landmark_enabled(&bd_app_instance, false);
 
-  // 4. Add landmarksï¼ˆå®éªŒç‚¹ï¼š117.12780039, 31.82965785ï¼›åŠå¾„ 1000mï¼‰
+  // 4. Add landmarks?????¾é??ç?????117.12780039, 31.82965785????©??? 1000m???
   bd_app_add_landmark(&bd_app_instance, &(bd_landmark_t){
       .id = 1,
       .ll = {31.82965785, 117.12780039},
       .enter_radius_m = 1000.0f,
-      .title = "USTC IAT",
-      .speech_text = "è¿™æ˜¯ç§‘å¤§å…ˆè¿›æŠ€æœ¯ç ”ç©¶é™¢"
+      .title = "Harbin Music Park",
+      /* GBK bytes: ??????????? */
+      .speech_text = "\xBB\xB6\xD3\xAD\xC0\xB4\xB5\xBD\xB9\xFE\xB6\xFB\xB1\xF5\xD2\xF4\xC0\xD6\xB9\xAB\xD4\xB0"
   });
 
-  /* è½¬å‘ç¯åˆå§‹åŒ–é¡»æ—©äº USART1 æ”¶æ•° */
+  /* ?????ç®????§????é?????ä?? USART1 ?????° */
   bd_debug_uart_forward_init();
-  /* ç¯å½¢ç¼“å†²å·²å°±ç»ªåå†å¼€ RXNE */
+  /* ç®????ç?????????°?ç???®????? RXNE */
 #if !BD_USE_USART2_FOR_GNSS
   __HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE);
 #else
   __HAL_UART_ENABLE_IT(&huart2, UART_IT_RXNE);
 #endif
-  /* ç¡®è®¤ PA2â†’USB-TTLâ†’PC æ˜¯å¦é€šï¼›åŸå§‹å­—èŠ‚æµè§ bd_debug_uart RAW_FORWARD */
+  /* ç????¤ PA2â??USB-TTLâ??PC ?????é?¹????®??§??­??©????§ bd_debug_uart RAW_FORWARD */
   bd_debug_uart_boot_line();
 #if BD_USART1_LOOPBACK_SELFTEST && !BD_USE_USART2_FOR_GNSS
-  bd_uart1_loopback_demo(); /* ä¸è¿”å›ï¼›æµ‹å®Œå°†å®æ”¹ 0 å†ç¼– */
+  bd_uart1_loopback_demo(); /* ä¸?????¾??????????°?????? 0 ??ç?? */
 #endif
 #endif
 
@@ -283,10 +336,11 @@ int main(void)
 #if BD_HW_SELFTEST
     HAL_Delay(500);
 #else
-    /* æ”¶æ•°ä»…åœ¨ USART1_IRQHandlerï¼šè¯» DRã€bd_ring_pushã€è½¬å‘ï¼›æ­¤å¤„åªåˆ· UI/è½®è¯¢ä¸šåŠ¡ */
+    /* ?????°ä????¨ USART1_IRQHandler??¹??? DR??bd_ring_push???????????­¤?¤?????? UI/??????ä¸¹?©? */
     bd_update_rx_rate();
     bd_debug_uart_forward_flush();
     bd_poll_nav_key();
+    bd_poll_test_action();
     bd_app_poll(&bd_app_instance);
     bd_debug_uart_forward_flush();
     {
@@ -301,8 +355,9 @@ int main(void)
     HAL_Delay(BD_MAIN_LOOP_DELAY_MS);
 #endif
 
-    /* USER CODE END 3 */
-  }
+  /* USER CODE END 3 */
+}
+  /* USER CODE END WHILE */
 }
 
 /**
@@ -346,35 +401,76 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
-/** PA0 æŒ‰é”®ï¼šå†…éƒ¨ä¸Šæ‹‰ã€æŒ‰ä¸‹ä¸ºä½ï¼›æ¯æ¬¡çŸ­æŒ‰åˆ‡æ¢åœ°æ ‡+TTS åŠŸèƒ½ï¼ˆNAV RUN/STOPï¼‰ */
+/** PA0 ???é????¹???é?¨ä¸©????????ä¸?ä¸?ä?®????????ç?­??????????°? ?+TTS ?©???????NAV RUN/STOP??? */
 static void bd_poll_nav_key(void) {
-  static uint8_t s_inited;
-  static uint8_t s_prev_down;
   static uint32_t s_quiet_until;
-  const uint32_t t = HAL_GetTick();
-  if (t < s_quiet_until) {
+  const uint32_t now = HAL_GetTick();
+  if (now < s_quiet_until) {
     return;
   }
-  const uint8_t down = (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_RESET) ? 1u : 0u;
-  if (!s_inited) {
-    s_inited = 1u;
-    s_prev_down = down;
-    return;
+  const GPIO_PinState pin = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
+#if BD_KEY_ACTIVE_LOW
+  const uint8_t down = (pin == GPIO_PIN_RESET) ? 1u : 0u;
+#else
+  const uint8_t down = (pin == GPIO_PIN_SET) ? 1u : 0u;
+#endif
+
+  /* press edge */
+  if (!s_key_prev_down && down) {
+    s_key_down_tick = now;
   }
-  if (s_prev_down == 0u && down == 1u) {
-    s_quiet_until = t + 280u;
-    bd_app_set_landmark_enabled(&bd_app_instance, !bd_app_instance.landmark_enabled);
-    ui_bd_live_reset();
+
+  /* release edge */
+  if (s_key_prev_down && !down) {
+    const uint32_t held = (uint32_t)(now - s_key_down_tick);
+    s_quiet_until = now + 120u;
+    if (held >= BD_KEY_LONG_PRESS_MS) {
+      /* long press: enter test mode (no immediate page/tts), schedule after 5s */
+      s_test_active = 0u;
+      s_test_pending = 1u;
+      s_test_deadline_tick = now + BD_TEST_ACTION_DELAY_MS;
+
+      /* entering test mode implies leaving nav mode */
+      bd_app_set_landmark_enabled(&bd_app_instance, false);
+      ui_bd_live_reset();
+#if BD_TJC_HMI_ENABLE
+      bd_tjc_show_page(BD_TJC_PAGE_BOOT);
+#endif
+    } else {
+      /* short press */
+      if (s_test_pending || s_test_active) {
+        /* exit test mode -> standby */
+        s_test_pending = 0u;
+        s_test_active = 0u;
+        bd_app_set_landmark_enabled(&bd_app_instance, false);
+        ui_bd_live_reset();
+#if BD_TJC_HMI_ENABLE
+        bd_tjc_show_page(BD_TJC_PAGE_BOOT);
+#endif
+      } else {
+        /* toggle NAV RUN/STOP (??????) */
+        const bool next = !bd_app_instance.landmark_enabled;
+        bd_app_set_landmark_enabled(&bd_app_instance, next);
+        ui_bd_live_reset();
+        if (!next) {
+          /* leaving RUN -> standby shows page0 */
+#if BD_TJC_HMI_ENABLE
+          bd_tjc_show_page(BD_TJC_PAGE_BOOT);
+#endif
+        }
+      }
+    }
   }
-  s_prev_down = down;
+
+  s_key_prev_down = down;
 }
 
 static void bd_update_rx_rate(void) {
   const uint32_t now = HAL_GetTick();
   const uint32_t dt = (uint32_t)(now - bd_last_rate_tick);
   /*
-   * NMEA å¤šä¸ºçº¦ 1Hz çªå‘ï¼›è‹¥ç”¨ 500ms çª—å£ï¼Œå®¹æ˜“è¿™ä¸€çª—èµ¶ä¸Šçªå‘ã€ä¸‹ä¸€çª—å‡ ä¹æ²¡æœ‰ï¼Œ
-   * æ¢ç®—æˆ â€œ/sâ€ å°±ä¼šåœ¨ä¸¤ä¸ªæ•°ä¹‹é—´è·³ï¼ˆä¾‹å¦‚ 9 ä¸ 0ï¼‰ã€‚æ”¹ç”¨çº¦ 1s çª—å£æ›´ç¨³ã€‚
+   * NMEA ?¤¹ä¸?ç?? 1Hz ç?????????ç?? 500ms ç????????????????ä¸?ç?????ä¸©ç?????ä¸?ä¸?ç???? ä?®?????????
+   * ??ç????? â??/sâ?? ?°?ä?¹??¨ä¸¤ä¸???°ä??é?´??????ä????? 9 ä¸? 0?????????ç?¨ç?? 1s ç??????´ç¨????
    */
   if (dt < 1000u) {
     return;

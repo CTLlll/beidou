@@ -394,6 +394,46 @@
           <GroupName>Application/User/Core</GroupName>
           <Files>
             <File>
+              <FileName>bd_app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\bd_app.c</FilePath>
+            </File>
+            <File>
+              <FileName>bd_geo.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\bd_geo.c</FilePath>
+            </File>
+            <File>
+              <FileName>bd_landmarks.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\bd_landmarks.c</FilePath>
+            </File>
+            <File>
+              <FileName>bd_nmea.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\bd_nmea.c</FilePath>
+            </File>
+            <File>
+              <FileName>bd_uart_ring.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\bd_uart_ring.c</FilePath>
+            </File>
+            <File>
+              <FileName>bd_debug_uart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\bd_debug_uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>tts_driver.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\tts_driver.c</FilePath>
+            </File>
+            <File>
+              <FileName>ui_display.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\ui_display.c</FilePath>
+            </File>
+            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/main.c</FilePath>
@@ -473,46 +513,6 @@
               <FileName>stm32f1xx_hal_msp.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/stm32f1xx_hal_msp.c</FilePath>
-            </File>
-            <File>
-              <FileName>bd_app.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\bd_app.c</FilePath>
-            </File>
-            <File>
-              <FileName>bd_geo.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\bd_geo.c</FilePath>
-            </File>
-            <File>
-              <FileName>bd_landmarks.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\bd_landmarks.c</FilePath>
-            </File>
-            <File>
-              <FileName>bd_nmea.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\bd_nmea.c</FilePath>
-            </File>
-            <File>
-              <FileName>bd_uart_ring.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\bd_uart_ring.c</FilePath>
-            </File>
-            <File>
-              <FileName>bd_debug_uart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\bd_debug_uart.c</FilePath>
-            </File>
-            <File>
-              <FileName>tts_driver.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\tts_driver.c</FilePath>
-            </File>
-            <File>
-              <FileName>ui_display.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\ui_display.c</FilePath>
             </File>
           </Files>
         </Group>
