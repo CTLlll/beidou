@@ -14,7 +14,6 @@
 *.lst
 *.iex
 *.Bak
-*.hex
 *.bin
 *.elf
 
@@ -35,6 +34,5 @@ docs/*.docx
 
 # 本地图片/屏幕工程测试产物（不上传）
 /hardware/
-/pic_output/
 /usart_screen/
 /usart_screen_lib/

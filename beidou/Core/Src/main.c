@@ -62,7 +62,10 @@
  * Á?? 1??π‰∏©Á???êÆ TTS???USART1 PA9?????≠?©?‰∏???? "OK"???È????Å?®??ù?È????????È?è‰?ß?è???? 0???
  */
 #ifndef BD_TTS_BOOT_SAY_OK
-#define BD_TTS_BOOT_SAY_OK 1
+#define BD_TTS_BOOT_SAY_OK 0
+#endif
+#ifndef BD_TTS_BOOT_SAY_CN
+#define BD_TTS_BOOT_SAY_CN 0
 #endif
 /**
  * Á?? 1??π‰????? MCU Á????? USART1 ????è????????????≠??????????®??ù? TX‚??PA10???Á?®?ù?È??Á??Á?≠?Æ? PA9(TX) ‰∏? PA10(RX)???
@@ -187,6 +190,12 @@ static void bd_tjc_show_page(const char *page_name) {
 #endif
 
 static void bd_poll_test_action(void) {
+    static const uint8_t k_test_phrase_gbk[] = {
+        0xD5, 0xE2, 0xCA, 0xC7, 0xD2, 0xBB, 0xB8, 0xF6,
+        0xB0, 0xB2, 0xBE, 0xB2, 0xB5, 0xC4, 0xD0, 0xA1,
+        0xC7, 0xF8, 0xBB, 0xB7, 0xBE, 0xB3, 0xD5, 0xFB,
+        0xBD, 0xE0, 0xD2, 0xCB, 0xBE, 0xD3
+    }; /* ??????????????? */
     if (!s_test_pending) {
         return;
     }
@@ -200,8 +209,9 @@ static void bd_poll_test_action(void) {
 #if BD_TJC_HMI_ENABLE
     bd_tjc_show_page(BD_TJC_PAGE_2);
 #endif
-    /* GBK bytes: ????????????????????? */
-    (void)tts_speak("\xB2\xE2\xCA\xD4\xBE\xB0\xB5\xE3\xA3\xBA\xD5\xE2\xCA\xC7\xD2\xBB\xB8\xF6\xB0\xB2\xBE\xB2\xB5\xC4\xD0\xA1\xC7\xF8\xA3\xAC\xBB\xB7\xBE\xB3\xD5\xFB\xBD\xE0\xD2\xCB\xBE\xD3");
+    /* Keep a short guard delay after HMI page switch, then play test speech. */
+    HAL_Delay(120);
+    (void)tts_speak_bytes(k_test_phrase_gbk, (uint16_t)sizeof(k_test_phrase_gbk));
 }
 
 /* USER CODE END 0 */
@@ -264,6 +274,16 @@ int main(void)
 #if BD_TTS_BOOT_SAY_OK
   HAL_Delay(150);
   (void)tts_speak("OK");
+#endif
+#if BD_TTS_BOOT_SAY_CN
+  {
+    static const uint8_t k_boot_cn_phrase[] = {
+        0xBF, 0xC6, 0xB4, 0xF3, 0xCF, 0xC8, 0xD1, 0xD0, 0xD4, 0xBA
+    }; /* ????? */
+    /* Use a longer guard delay to avoid preempting prior playback. */
+    HAL_Delay(3000);
+    (void)tts_speak_bytes(k_boot_cn_phrase, (uint16_t)sizeof(k_boot_cn_phrase));
+  }
 #endif
 #if BD_TJC_HMI_ENABLE
   bd_tjc_send_cmd("bkcmd=0");

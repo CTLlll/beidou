@@ -22,6 +22,14 @@ void tts_init(void);
 bool tts_speak(const char *text);
 
 /**
+ * @brief 发送原始字节让 TTS 播报（推荐用于 GBK 字节数组）
+ * @param data 原始文本字节
+ * @param len  字节长度
+ * @return true 发送成功（不代表播报成功）
+ */
+bool tts_speak_bytes(const uint8_t *data, uint16_t len);
+
+/**
  * @brief 停止当前播报
  */
 void tts_stop(void);

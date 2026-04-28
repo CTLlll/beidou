@@ -17,27 +17,39 @@
 
 extern UART_HandleTypeDef huart1;
 
-// 内部函数：计算字符串的 GBK 长度
-// 由于 STM32F103 缺少完整的 GBK 编码表，这里做简化处理：
-// 如果字符 < 0x80，说明是 ASCII，直接计 1
-// 中文字符按 2 字节计算（简化假设）
-static size_t calc_gbk_len(const char *s) {
-    size_t len = 0;
-    while (*s) {
-        if ((uint8_t)(*s) < 0x80) {
-            len++;
-        } else {
-            len += 2;  // 简化：假设双字节字符
-            if (s[1]) s++;
-        }
-        s++;
-    }
-    return len;
-}
+/* Text coding selector for synthesis command.
+   0x00 works on many modules for GBK/GB2312 byte streams.
+   If needed, switch to 0x05 to test vendor-specific mode. */
+#ifndef TTS_TEXT_CODING
+#define TTS_TEXT_CODING 0x00u
+#endif
 
 void tts_init(void) {
     // 可以在这里做模块初始化，例如设置默认音量
     // TTS 模块上电后默认可以工作
+}
+
+bool tts_speak_bytes(const uint8_t *data, uint16_t len) {
+    if (!data || len == 0u) {
+        return false;
+    }
+
+    size_t frame_len = (size_t)len + 2u;  // payload + cmd/type bytes
+    uint8_t frame[5] = {
+        0xFD,
+        0x00,
+        (uint8_t)(frame_len & 0xFF),
+        0x01,
+        (uint8_t)TTS_TEXT_CODING
+    };
+
+    if (HAL_UART_Transmit(&huart1, frame, sizeof(frame), 120) != HAL_OK) {
+        return false;
+    }
+    if (HAL_UART_Transmit(&huart1, (uint8_t *)data, len, 800) != HAL_OK) {
+        return false;
+    }
+    return true;
 }
 
 bool tts_speak(const char *text) {
@@ -45,31 +57,13 @@ bool tts_speak(const char *text) {
         return false;
     }
 
-    // 计算文本长度（简化处理：ASCII=1，非 ASCII=2）
-    size_t text_len = calc_gbk_len(text);
-    size_t frame_len = text_len + 2;  // 帧长度 = 文本 + 2
-
-    // 构建帧头
-    uint8_t frame[6] = {
-        0xFD,                    // 帧开始
-        0x00,                    // 高字节长度（固定0）
-        (uint8_t)(frame_len & 0xFF),  // 低字节长度
-        0x01,                    // 命令类型（合成播放）
-        0x05                     // 文本类型（GBK）
-    };
-
-    // 发送帧头
-    if (HAL_UART_Transmit(&huart1, frame, 5, 100) != HAL_OK) {
+    /* text is already raw bytes (ASCII or GBK byte sequence like \xD5\xE2...).
+       Use exact byte length to keep frame length fully consistent. */
+    size_t text_len = strlen(text);
+    if (text_len > 0xFFFFu) {
         return false;
     }
-
-    // 发送文本（实际应转为 GBK）
-    // 这里直接发送，假设模块能处理或文本是 ASCII
-    if (HAL_UART_Transmit(&huart1, (uint8_t*)text, text_len, 500) != HAL_OK) {
-        return false;
-    }
-
-    return true;
+    return tts_speak_bytes((const uint8_t *)text, (uint16_t)text_len);
 }
 
 void tts_stop(void) {
